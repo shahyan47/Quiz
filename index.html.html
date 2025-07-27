@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Web Dev Quiz</title>
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+  <style>
+    body {
+      background-color: #f0f2f5;
+      
+    }
+    .quiz-container {
+      max-width: 700px;
+      margin: 50px auto;
+      padding: 30px;
+      background-color:whitesmoke;
+      border-radius: 20px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    
+    }
+    .option {
+      margin: 8px 0;
+    }
+    #timer {
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="quiz-container">
+      <h2 class="text-center mb-4">HTML/CSS/JavaScript Quiz</h2>
+
+      <!-- Progress Bar -->
+      <div class="progress mb-3">
+        <div id="progressBar" class="progress-bar bg-success" style="width: 0%">0%</div>
+      </div>
+
+      <!-- Timer -->
+      <div class="text-end text-danger mb-2" id="timer">Time left: 30s</div>
+
+      <!-- Question & Options -->
+      <div id="quiz">
+        <h5 id="question"></h5>
+        <div id="options" class="mb-3"></div>
+        <button id="nextBtn" class="btn btn-primary" disabled>Next</button>
+        <div id="result" class="mt-4 text-center fw-bold fs-5"></div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const quizData = [
+      {
+        question: "Which HTML tag is used to define a hyperlink?",
+        options: ["<a>", "<link>", "<href>", "<nav>"],
+        answer: "<a>"
+      },
+      {
+        question: "Which CSS property controls the text size?",
+        options: ["font-style", "text-size", "font-size", "text-style"],
+        answer: "font-size"
+      },
+      {
+        question: "Inside which HTML element do we put the JavaScript?",
+        options: ["<js>", "<javascript>", "<script>", "<code>"],
+        answer: "<script>"
+      },
+      {
+        question: "What does CSS stand for?",
+        options: ["Cascading Style Sheets", "Colorful Style Sheets", "Computer Style Sheets", "Creative Style Syntax"],
+        answer: "Cascading Style Sheets"
+      },
+      {
+        question: "Which operator is used to assign a value to a variable in JavaScript?",
+        options: ["=", "==", "===", "::"],
+        answer: "="
+      }
+    ];
+
+    let currentQuestion = 0;
+    let score = 0;
+    let timer;
+    let timeLeft = 15;
+
+    const questionEl = document.getElementById("question");
+    const optionsEl = document.getElementById("options");
+    const nextBtn = document.getElementById("nextBtn");
+    const resultEl = document.getElementById("result");
+    const timerEl = document.getElementById("timer");
+    const progressBar = document.getElementById("progressBar");
+
+    function loadQuestion() {
+      const current = quizData[currentQuestion];
+      questionEl.textContent = `Q${currentQuestion + 1}: ${current.question}`;
+      optionsEl.innerHTML = "";
+      nextBtn.disabled = true;
+
+      current.options.forEach(option => {
+        const btn = document.createElement("button");
+        btn.classList.add("btn", "btn-outline-secondary", "option", "w-100");
+        btn.textContent = option;
+        btn.onclick = () => checkAnswer(btn, option);
+        optionsEl.appendChild(btn);
+      });
+
+      updateProgress();
+      startTimer();
+    }
+
+    function checkAnswer(button, selected) {
+      clearInterval(timer);
+      const correct = quizData[currentQuestion].answer;
+
+      [...optionsEl.children].forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === correct) {
+          btn.classList.replace("btn-outline-secondary", "btn-success");
+        } else if (btn.textContent === selected) {
+          btn.classList.replace("btn-outline-secondary", "btn-danger");
+        }
+      });
+
+      if (selected === correct) {
+        score++;
+      }
+
+      nextBtn.disabled = false;
+    }
+
+    function startTimer() {
+      timeLeft = 30;
+      timerEl.textContent = `Time left: ${timeLeft}s`;
+
+      timer = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = `Time left: ${timeLeft}s`;
+
+        if (timeLeft === 0) {
+          clearInterval(timer);
+          autoSelect();
+        }
+      }, 1000);
+    }
+
+    function autoSelect() {
+      const correct = quizData[currentQuestion].answer;
+
+      [...optionsEl.children].forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === correct) {
+          btn.classList.replace("btn-outline-secondary", "btn-success");
+        }
+      });
+
+      nextBtn.disabled = false;
+    }
+
+    function updateProgress() {
+      const percent = ((currentQuestion) / quizData.length) * 100;
+      progressBar.style.width = `${percent}%`;
+      progressBar.textContent = `${Math.round(percent)}%`;
+    }
+
+    nextBtn.addEventListener("click", () => {
+      currentQuestion++;
+      if (currentQuestion < quizData.length) {
+        loadQuestion();
+      } else {
+        showResult();
+      }
+    });
+
+    function showResult() {
+      questionEl.style.display = "none";
+      optionsEl.style.display = "none";
+      nextBtn.style.display = "none";
+      timerEl.style.display = "none";
+      progressBar.style.width = `100%`;
+      progressBar.textContent = `100%`;
+      resultEl.innerHTML = `✅ You scored <span class="text-success">${score}</span> out of <span class="text-primary">${quizData.length}</span>`;
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
